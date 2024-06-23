@@ -14,7 +14,7 @@ export class GameState {
   private camera = new THREE.PerspectiveCamera();
   private controls: OrbitControls;
 
-  private animatedCharacter: AnimatedCharacter;
+  // private animatedCharacter: AnimatedCharacter;
 
   constructor(private gameLoader: GameLoader, private events: EventListener) {
     this.setupCamera();
@@ -30,9 +30,9 @@ export class GameState {
 
     this.scene.background = new THREE.Color("#1680AF");
 
-    this.animatedCharacter = this.setupAnimatedCharacter();
-    this.scene.add(this.animatedCharacter.object);
-    this.animatedCharacter.playAnimation('idle');
+    // this.animatedCharacter = this.setupAnimatedCharacter();
+    // this.scene.add(this.animatedCharacter.object);
+    // this.animatedCharacter.playAnimation("idle");
 
     // Start game
     this.update();
@@ -54,25 +54,29 @@ export class GameState {
   }
 
   private setupObjects() {
-    const box = this.gameLoader.modelLoader.get("box");
-    this.scene.add(box);
+    const floor = new THREE.Mesh(
+      new THREE.PlaneGeometry(20, 20),
+      new THREE.MeshBasicMaterial({ color: "grey" })
+    );
+    floor.rotateX(-Math.PI / 2);
+    this.scene.add(floor);
   }
 
-  private setupAnimatedCharacter(): AnimatedCharacter {
-    const object = this.gameLoader.modelLoader.get("bandit");
-    object.position.z = -0.5;
-    this.gameLoader.textureLoader.applyModelTexture(object, 'bandit');
+  // private setupAnimatedCharacter(): AnimatedCharacter {
+  //   const object = this.gameLoader.modelLoader.get("bandit");
+  //   object.position.z = -0.5;
+  //   this.gameLoader.textureLoader.applyModelTexture(object, "bandit");
 
-    const mixer = new THREE.AnimationMixer(object);
-    const actions = new Map<string, THREE.AnimationAction>();
-    const idleClip = this.gameLoader.animLoader.clips.get('idle');
-    if (idleClip) {
-      const idleAction = mixer.clipAction(idleClip);
-      actions.set('idle', idleAction);
-    } 
-    
-    return new AnimatedCharacter(object, mixer, actions);
-  }
+  //   const mixer = new THREE.AnimationMixer(object);
+  //   const actions = new Map<string, THREE.AnimationAction>();
+  //   const idleClip = this.gameLoader.animLoader.clips.get("idle");
+  //   if (idleClip) {
+  //     const idleAction = mixer.clipAction(idleClip);
+  //     actions.set("idle", idleAction);
+  //   }
+
+  //   return new AnimatedCharacter(object, mixer, actions);
+  // }
 
   private update = () => {
     requestAnimationFrame(this.update);
@@ -81,7 +85,7 @@ export class GameState {
 
     this.controls.update();
 
-    this.animatedCharacter.update(dt);
+    // this.animatedCharacter.update(dt);
 
     this.renderPipeline.render(dt);
   };

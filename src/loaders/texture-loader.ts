@@ -41,21 +41,21 @@ export class TextureLoader {
   private loadTextures() {
     const loader = new THREE.TextureLoader(this.loadingManager);
     this.getNameUrlMap().forEach((url, name) => {
-      loader.load(url, texture => {
+      loader.load(url, (texture) => {
         texture.encoding = THREE.sRGBEncoding;
         this.textures.set(name, texture);
-      })
-    })
+      });
+    });
   }
 
   private getNameUrlMap() {
     const map = new Map<string, string>();
 
-    const banditUrl = new URL('/textures/bandit-texture.png', import.meta.url).href;
-    map.set('bandit', banditUrl);
+    map.set(
+      "weapon-skin",
+      new URL("/textures/Wep_Skin_26.png", import.meta.url).href
+    );
 
     return map;
   }
-
-
 }
