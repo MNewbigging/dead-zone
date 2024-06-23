@@ -1,10 +1,12 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
 
 import { GameLoader } from "../loaders/game-loader";
 import { RenderPipeline } from "./render-pipeline";
 import { AnimatedCharacter } from "./animated-character";
 import { EventListener } from "../listeners/event-listener";
+import { MouseListener } from "../listeners/mouse-listener";
 
 export class GameState {
   private renderPipeline: RenderPipeline;
@@ -12,7 +14,9 @@ export class GameState {
 
   private scene = new THREE.Scene();
   private camera = new THREE.PerspectiveCamera();
-  private controls: OrbitControls;
+  private controls: PointerLockControls;
+
+  private mouseListener = new MouseListener();
 
   // private animatedCharacter: AnimatedCharacter;
 
@@ -21,14 +25,18 @@ export class GameState {
 
     this.renderPipeline = new RenderPipeline(this.scene, this.camera);
 
+    // Handle pointer lock events
+    document.addEventListener("pointerlockchange", this.onPointerLockChange);
+    document.addEventListener("pointerlockerror", this.onPointerLockError);
+
     this.setupLights();
+    this.setupHdri();
     this.setupObjects();
 
-    this.controls = new OrbitControls(this.camera, this.renderPipeline.canvas);
-    this.controls.enableDamping = true;
-    this.controls.target.set(0, 1, 0);
-
-    this.scene.background = new THREE.Color("#1680AF");
+    this.controls = new PointerLockControls(
+      this.camera,
+      this.renderPipeline.canvas
+    );
 
     // this.animatedCharacter = this.setupAnimatedCharacter();
     // this.scene.add(this.animatedCharacter.object);
@@ -36,6 +44,27 @@ export class GameState {
 
     // Start game
     this.update();
+  }
+
+  resumeGame() {
+    this.renderPipeline.canvas.requestPointerLock();
+    this.mouseListener.enable();
+  }
+
+  private onPointerLockChange = () => {
+    // If exiting
+    if (document.pointerLockElement !== this.renderPipeline.canvas) {
+      this.pauseGame();
+    }
+  };
+
+  private onPointerLockError = () => {
+    this.pauseGame();
+  };
+
+  private pauseGame() {
+    // Fire pause event...
+    this.mouseListener.disable();
   }
 
   private setupCamera() {
@@ -51,6 +80,14 @@ export class GameState {
     const directLight = new THREE.DirectionalLight(undefined, Math.PI);
     directLight.position.copy(new THREE.Vector3(0.75, 1, 0.75).normalize());
     this.scene.add(directLight);
+  }
+
+  private setupHdri() {
+    const hdri = this.gameLoader.textureLoader.get("hdri");
+    if (hdri) {
+      this.scene.environment = hdri;
+      this.scene.background = hdri;
+    }
   }
 
   private setupObjects() {
@@ -82,8 +119,6 @@ export class GameState {
     requestAnimationFrame(this.update);
 
     const dt = this.clock.getDelta();
-
-    this.controls.update();
 
     // this.animatedCharacter.update(dt);
 

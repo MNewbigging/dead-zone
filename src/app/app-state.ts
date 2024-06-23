@@ -26,6 +26,11 @@ export class AppState {
     this.started = true;
   };
 
+  @action resumeGame = () => {
+    this.gameState?.resumeGame();
+    this.paused = false;
+  };
+
   private async loadGame() {
     this.gameLoader.load(this.onLoad);
   }
