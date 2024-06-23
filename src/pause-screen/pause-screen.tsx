@@ -1,14 +1,20 @@
 import { observer } from "mobx-react-lite";
-import { GameState } from "../game/game-state";
 import "./pause-screen.scss";
 import React from "react";
+import { AppState } from "../app/app-state";
 
 interface PauseScreenProps {
-  gameState: GameState;
+  appState: AppState;
 }
 
 export const PauseScreen: React.FC<PauseScreenProps> = observer(
-  ({ gameState }) => {
-    return <div className="pause-screen"></div>;
+  ({ appState }) => {
+    return (
+      <div className="pause-screen">
+        <div className="menu-button" onClick={appState.resumeGame}>
+          Resume
+        </div>
+      </div>
+    );
   }
 );

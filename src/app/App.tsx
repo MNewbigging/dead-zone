@@ -21,7 +21,7 @@ export const App: React.FC<AppProps> = observer(({ appState }) => {
     <div id="canvas-root">
       {!started && <LoadingScreen appState={appState} />}
 
-      {paused && gameState && <PauseScreen gameState={gameState} />}
+      {paused && <PauseScreen appState={appState} />}
 
       {started && !paused && gameState && <GameScreen gameState={gameState} />}
     </div>

@@ -1,7 +1,7 @@
 import * as THREE from "three";
 
 export interface EventMap {
-  'event-name': null; 
+  "game-paused": null;
 }
 
 type EventCallback = (event: any) => void;

@@ -66,7 +66,7 @@ export class GameState {
   };
 
   private pauseGame() {
-    // Fire pause event...
+    this.events.fire("game-paused", null);
     this.mouseListener.disable();
   }
 

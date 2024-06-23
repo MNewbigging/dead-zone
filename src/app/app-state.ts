@@ -17,6 +17,8 @@ export class AppState {
   constructor() {
     makeAutoObservable(this);
 
+    this.events.on("game-paused", this.onPause);
+
     // Give loading UI time to mount
     setTimeout(() => this.loadGame(), 10);
   }
@@ -37,5 +39,9 @@ export class AppState {
 
   @action private onLoad = () => {
     this.loaded = true;
+  };
+
+  @action private onPause = () => {
+    this.paused = true;
   };
 }
