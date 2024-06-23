@@ -1,5 +1,4 @@
 import * as THREE from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
 
 import { GameLoader } from "../loaders/game-loader";
@@ -13,7 +12,7 @@ export class GameState {
   private clock = new THREE.Clock();
 
   private scene = new THREE.Scene();
-  private camera = new THREE.PerspectiveCamera();
+  private camera: THREE.PerspectiveCamera;
   private controls: PointerLockControls;
 
   private mouseListener = new MouseListener();
@@ -21,22 +20,24 @@ export class GameState {
   // private animatedCharacter: AnimatedCharacter;
 
   constructor(private gameLoader: GameLoader, private events: EventListener) {
-    this.setupCamera();
-
+    this.camera = this.setupCamera();
+    this.camera.position.set(0, 1.8, 0);
+    this.scene.add(this.camera);
     this.renderPipeline = new RenderPipeline(this.scene, this.camera);
 
     // Handle pointer lock events
     document.addEventListener("pointerlockchange", this.onPointerLockChange);
     document.addEventListener("pointerlockerror", this.onPointerLockError);
 
-    this.setupLights();
-    this.setupHdri();
-    this.setupObjects();
-
     this.controls = new PointerLockControls(
       this.camera,
       this.renderPipeline.canvas
     );
+    this.renderPipeline.canvas.requestPointerLock();
+
+    this.setupLights();
+    this.setupHdri();
+    this.setupObjects();
 
     // this.animatedCharacter = this.setupAnimatedCharacter();
     // this.scene.add(this.animatedCharacter.object);
@@ -68,9 +69,12 @@ export class GameState {
   }
 
   private setupCamera() {
-    this.camera.fov = 75;
-    this.camera.far = 500;
-    this.camera.position.set(0, 1.5, 3);
+    const camera = new THREE.PerspectiveCamera();
+    camera.fov = 75;
+    camera.far = 500;
+    camera.near = 0.01;
+
+    return camera;
   }
 
   private setupLights() {
@@ -92,7 +96,7 @@ export class GameState {
 
   private setupObjects() {
     const floor = new THREE.Mesh(
-      new THREE.PlaneGeometry(20, 20),
+      new THREE.PlaneGeometry(200, 200),
       new THREE.MeshBasicMaterial({ color: "grey" })
     );
     floor.rotateX(-Math.PI / 2);
@@ -119,8 +123,6 @@ export class GameState {
     requestAnimationFrame(this.update);
 
     const dt = this.clock.getDelta();
-
-    // this.animatedCharacter.update(dt);
 
     this.renderPipeline.render(dt);
   };
