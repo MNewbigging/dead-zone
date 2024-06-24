@@ -5,13 +5,14 @@ import { MouseListener } from "../listeners/mouse-listener";
 import { KeyboardListener } from "../listeners/keyboard-listener";
 import { EventListener } from "../listeners/event-listener";
 import { TweenFactory, tilAnimEnd } from "./tween-factory";
+import { makeAutoObservable, observable } from "mobx";
 
 export class EquipmentManager {
   private bulletDecalMaterial: THREE.MeshPhongMaterial;
   private pistol: Gun;
 
   private heldGuns: Gun[] = [];
-  private equippedGun?: Gun;
+  @observable equippedGun?: Gun;
   private equipping = false;
 
   constructor(
@@ -22,6 +23,8 @@ export class EquipmentManager {
     private scene: THREE.Scene,
     private camera: THREE.PerspectiveCamera
   ) {
+    makeAutoObservable(this);
+
     this.bulletDecalMaterial = this.setupBulletDecalMaterial();
     this.pistol = this.setupPistol();
   }

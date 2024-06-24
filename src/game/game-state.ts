@@ -20,7 +20,7 @@ export class GameState {
   private keyboardListener = new KeyboardListener();
   private paused = false;
 
-  private equipmentManager: EquipmentManager;
+  equipmentManager: EquipmentManager;
 
   constructor(private gameLoader: GameLoader, private events: EventListener) {
     this.camera = this.setupCamera();
