@@ -1,0 +1,16 @@
+.stamina-display {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 26px;
+  border-radius: 2px;
+
+  border: 2px solid white;
+
+  .stamina-bar {
+    background-color: white;
+    height: 100%;
+  }
+}
