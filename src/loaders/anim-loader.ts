@@ -72,6 +72,16 @@ export class AnimLoader {
       new URL("/anims/zombie-idle.fbx", import.meta.url).href
     );
 
+    map.set(
+      "zombie-walk",
+      new URL("/anims/zombie-walk.fbx", import.meta.url).href
+    );
+
+    map.set(
+      "zombie-attack",
+      new URL("/anims/zombie-attack.fbx", import.meta.url).href
+    );
+
     return map;
   }
 }

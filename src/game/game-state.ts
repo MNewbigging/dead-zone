@@ -71,9 +71,18 @@ export class GameState {
     if (idleClip) {
       const idleAction = mixer.clipAction(idleClip);
       actions.set("idle", idleAction);
-    } else {
-      console.log("no idle");
     }
+    const walkClip = this.gameLoader.animLoader.clips.get("zombie-walk");
+    if (walkClip) {
+      const walkAction = mixer.clipAction(walkClip);
+      actions.set("walk", walkAction);
+    }
+    const attackClip = this.gameLoader.animLoader.clips.get("zombie-attack");
+    if (attackClip) {
+      const attackAction = mixer.clipAction(attackClip);
+      actions.set("attack", attackAction);
+    }
+
     const animatedCharacter = new AnimatedCharacter(zombie, mixer, actions);
     animatedCharacter.playAnimation("idle");
     this.zombies.push(animatedCharacter);
