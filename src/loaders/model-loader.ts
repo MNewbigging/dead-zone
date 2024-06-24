@@ -44,6 +44,14 @@ export class ModelLoader {
     const fbxLoader = new FBXLoader(this.loadingManager);
     this.loadPistol(fbxLoader);
     this.loadRifle(fbxLoader);
+
+    this.getZombieMap().forEach((url, name) => {
+      fbxLoader.load(url, (group) => {
+        group.name = "zombie";
+        this.scaleSyntyModel(group);
+        this.models.set(name, group);
+      });
+    });
   };
 
   private loadPistol(loader: FBXLoader) {
@@ -62,6 +70,17 @@ export class ModelLoader {
       group.name = "rifle";
       this.rifle = group;
     });
+  }
+
+  private getZombieMap() {
+    const map = new Map<string, string>();
+
+    map.set(
+      "zombie-01",
+      new URL("/models/SK_Zombie_Businessman_Male_01.fbx", import.meta.url).href
+    );
+
+    return map;
   }
 
   private scaleSyntyModel(group: THREE.Group) {

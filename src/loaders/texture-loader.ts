@@ -70,6 +70,11 @@ export class TextureLoader {
       new URL("/textures/bullet_hole.png", import.meta.url).href
     );
 
+    map.set(
+      "zombie-atlas",
+      new URL("/textures/PolygonZombie_Texture_01_A.png", import.meta.url).href
+    );
+
     return map;
   }
 }

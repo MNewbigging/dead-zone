@@ -9,6 +9,7 @@ import { EventListener } from "../listeners/event-listener";
 import { MouseListener } from "../listeners/mouse-listener";
 import { KeyboardListener } from "../listeners/keyboard-listener";
 import { EquipmentManager } from "./equipment-manager";
+import { Player } from "./player";
 
 export class GameState {
   private renderPipeline: RenderPipeline;
@@ -20,11 +21,13 @@ export class GameState {
   private keyboardListener = new KeyboardListener();
   private paused = false;
 
+  player: Player;
   equipmentManager: EquipmentManager;
+
+  zombies: AnimatedCharacter[] = [];
 
   constructor(private gameLoader: GameLoader, private events: EventListener) {
     this.camera = this.setupCamera();
-    this.camera.position.set(0, 1.8, 0);
     this.scene.add(this.camera);
     this.renderPipeline = new RenderPipeline(this.scene, this.camera);
 
@@ -38,6 +41,8 @@ export class GameState {
     );
     this.renderPipeline.canvas.requestPointerLock();
 
+    this.player = new Player(this.keyboardListener, this.controls);
+
     this.equipmentManager = new EquipmentManager(
       gameLoader,
       this.mouseListener,
@@ -46,16 +51,34 @@ export class GameState {
       this.scene,
       this.camera
     );
-    this.equipmentManager.pickupPistolAmmo(12);
-    this.equipmentManager.equipPistol();
 
     this.setupLights();
     this.setupHdri();
-    this.setupObjects();
 
-    // this.animatedCharacter = this.setupAnimatedCharacter();
-    // this.scene.add(this.animatedCharacter.object);
-    // this.animatedCharacter.playAnimation("idle");
+    // Game setup
+    this.camera.position.set(0, 1.5, 2);
+    this.setupObjects();
+    this.equipmentManager.pickupPistolAmmo(12);
+    this.equipmentManager.equipPistol();
+
+    // Zombie testing
+    const zombie = this.gameLoader.modelLoader.get("zombie-01");
+    this.gameLoader.textureLoader.applyModelTexture(zombie, "zombie-atlas");
+
+    const mixer = new THREE.AnimationMixer(zombie);
+    const actions = new Map<string, THREE.AnimationAction>();
+    const idleClip = this.gameLoader.animLoader.clips.get("zombie-idle");
+    if (idleClip) {
+      const idleAction = mixer.clipAction(idleClip);
+      actions.set("idle", idleAction);
+    } else {
+      console.log("no idle");
+    }
+    const animatedCharacter = new AnimatedCharacter(zombie, mixer, actions);
+    animatedCharacter.playAnimation("idle");
+    this.zombies.push(animatedCharacter);
+
+    this.scene.add(zombie);
 
     // Start game
     this.update();
@@ -120,7 +143,7 @@ export class GameState {
 
     const boxMat = new THREE.MeshBasicMaterial({ color: "red" });
     const box1 = new THREE.Mesh(new THREE.BoxGeometry(), boxMat);
-    box1.position.set(0, 1, -1);
+    box1.position.set(0, 0.5, -5);
     this.scene.add(box1);
 
     const box2 = new THREE.Mesh(new THREE.BoxGeometry(), boxMat);
@@ -132,22 +155,6 @@ export class GameState {
     this.scene.add(box3);
   }
 
-  // private setupAnimatedCharacter(): AnimatedCharacter {
-  //   const object = this.gameLoader.modelLoader.get("bandit");
-  //   object.position.z = -0.5;
-  //   this.gameLoader.textureLoader.applyModelTexture(object, "bandit");
-
-  //   const mixer = new THREE.AnimationMixer(object);
-  //   const actions = new Map<string, THREE.AnimationAction>();
-  //   const idleClip = this.gameLoader.animLoader.clips.get("idle");
-  //   if (idleClip) {
-  //     const idleAction = mixer.clipAction(idleClip);
-  //     actions.set("idle", idleAction);
-  //   }
-
-  //   return new AnimatedCharacter(object, mixer, actions);
-  // }
-
   private update = () => {
     requestAnimationFrame(this.update);
 
@@ -156,29 +163,11 @@ export class GameState {
     if (!this.paused) {
       TWEEN.update();
 
-      this.playerMovement(dt);
+      this.player.update(dt);
       this.equipmentManager.update(dt);
+      this.zombies.forEach((zombie) => zombie.update(dt));
 
       this.renderPipeline.render(dt);
     }
   };
-
-  private playerMovement(dt: number) {
-    const moveForward = this.keyboardListener.isKeyPressed("w");
-    const moveBackward = this.keyboardListener.isKeyPressed("s");
-    const moveLeft = this.keyboardListener.isKeyPressed("a");
-    const moveRight = this.keyboardListener.isKeyPressed("d");
-
-    const moveDirection = new THREE.Vector3();
-    moveDirection.z = Number(moveForward) - Number(moveBackward);
-    moveDirection.x = Number(moveRight) - Number(moveLeft);
-    moveDirection.normalize();
-
-    const velocity = new THREE.Vector3();
-    velocity.z = moveDirection.z * dt * 5;
-    velocity.x = moveDirection.x * dt * 5;
-
-    this.controls.moveForward(velocity.z);
-    this.controls.moveRight(velocity.x);
-  }
 }

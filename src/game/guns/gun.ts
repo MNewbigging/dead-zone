@@ -179,14 +179,12 @@ export class Gun {
   private fire = () => {
     // Can't fire when reloading
     if (this.reloadAction?.isRunning()) {
-      console.log("cant fire when reloading");
       return;
     }
 
     // Is there a bullet available to fire?
     if (this.magAmmo <= 0) {
       // Must reload
-      console.log("cant fire with no ammo");
       return;
     }
 
@@ -268,7 +266,7 @@ export class Gun {
 
   private placeStaticDecal(intersection: THREE.Intersection) {
     // For now, can only place on static objects
-    if (intersection.object.name.includes("body")) {
+    if (intersection.object.parent?.name.includes("zombie")) {
       return;
     }
 
