@@ -6,6 +6,9 @@ export class ModelLoader {
   doneLoading = false;
   readonly models = new Map<string, THREE.Object3D>();
 
+  pistol = this.createDebugObject();
+  rifle = this.createDebugObject();
+
   private loadingManager = new THREE.LoadingManager();
 
   // Returns a clone of the model or a red sphere if not found
@@ -39,19 +42,38 @@ export class ModelLoader {
 
   private loadModels = () => {
     const fbxLoader = new FBXLoader(this.loadingManager);
-    this.getNameUrlMap().forEach((url, name) => {
-      fbxLoader.load(url, (group) => {
-        this.models.set(name, group);
-      });
-    });
+    this.loadPistol(fbxLoader);
+    this.loadRifle(fbxLoader);
   };
 
-  private getNameUrlMap() {
-    const map = new Map<string, string>();
+  private loadPistol(loader: FBXLoader) {
+    const pistolUrl = new URL("/models/pistol.fbx", import.meta.url).href;
+    loader.load(pistolUrl, (group) => {
+      this.scaleSyntyModel(group);
+      group.name = "pistol";
+      this.pistol = group;
+    });
+  }
 
-    map.set("pistol", new URL("/models/pistol.fbx", import.meta.url).href);
-    map.set("rifle", new URL("/models/rifle.fbx", import.meta.url).href);
+  private loadRifle(loader: FBXLoader) {
+    const url = new URL("/models/rifle.fbx", import.meta.url).href;
+    loader.load(url, (group) => {
+      this.scaleSyntyModel(group);
+      group.name = "rifle";
+      this.rifle = group;
+    });
+  }
 
-    return map;
+  private scaleSyntyModel(group: THREE.Group) {
+    // Synty models need scale adjusting, unless done in blender beforehand
+    group.scale.multiplyScalar(0.01);
+    group.updateMatrixWorld();
+  }
+
+  private createDebugObject(): THREE.Object3D {
+    return new THREE.Mesh(
+      new THREE.SphereGeometry(0.5, 32, 32),
+      new THREE.MeshBasicMaterial({ color: "red" })
+    );
   }
 }

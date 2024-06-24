@@ -2,6 +2,7 @@ import * as THREE from "three";
 
 export interface EventMap {
   "game-paused": null;
+  "shot-intersect": THREE.Intersection;
 }
 
 type EventCallback = (event: any) => void;

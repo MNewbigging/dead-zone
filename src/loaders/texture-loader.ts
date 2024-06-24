@@ -65,6 +65,11 @@ export class TextureLoader {
       new URL("/textures/Wep_Skin_26.png", import.meta.url).href
     );
 
+    map.set(
+      "bullet-hole",
+      new URL("/textures/bullet_hole.png", import.meta.url).href
+    );
+
     return map;
   }
 }

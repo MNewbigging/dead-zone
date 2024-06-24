@@ -1,3 +1,4 @@
+import * as TWEEN from "@tweenjs/tween.js";
 import * as THREE from "three";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
 
@@ -7,19 +8,19 @@ import { AnimatedCharacter } from "./animated-character";
 import { EventListener } from "../listeners/event-listener";
 import { MouseListener } from "../listeners/mouse-listener";
 import { KeyboardListener } from "../listeners/keyboard-listener";
+import { EquipmentManager } from "./equipment-manager";
 
 export class GameState {
   private renderPipeline: RenderPipeline;
   private clock = new THREE.Clock();
-
   private scene = new THREE.Scene();
   private camera: THREE.PerspectiveCamera;
   private controls: PointerLockControls;
-
   private mouseListener = new MouseListener();
   private keyboardListener = new KeyboardListener();
+  private paused = false;
 
-  // private animatedCharacter: AnimatedCharacter;
+  private equipmentManager: EquipmentManager;
 
   constructor(private gameLoader: GameLoader, private events: EventListener) {
     this.camera = this.setupCamera();
@@ -37,6 +38,16 @@ export class GameState {
     );
     this.renderPipeline.canvas.requestPointerLock();
 
+    this.equipmentManager = new EquipmentManager(
+      gameLoader,
+      this.mouseListener,
+      this.keyboardListener,
+      this.events,
+      this.scene,
+      this.camera
+    );
+    this.equipmentManager.equipPistol();
+
     this.setupLights();
     this.setupHdri();
     this.setupObjects();
@@ -52,6 +63,7 @@ export class GameState {
   resumeGame() {
     this.renderPipeline.canvas.requestPointerLock();
     this.mouseListener.enable();
+    this.paused = false;
   }
 
   private onPointerLockChange = () => {
@@ -68,6 +80,7 @@ export class GameState {
   private pauseGame() {
     this.events.fire("game-paused", null);
     this.mouseListener.disable();
+    this.paused = true;
   }
 
   private setupCamera() {
@@ -139,9 +152,14 @@ export class GameState {
 
     const dt = this.clock.getDelta();
 
-    this.playerMovement(dt);
+    if (!this.paused) {
+      TWEEN.update();
 
-    this.renderPipeline.render(dt);
+      this.playerMovement(dt);
+      this.equipmentManager.update(dt);
+
+      this.renderPipeline.render(dt);
+    }
   };
 
   private playerMovement(dt: number) {
