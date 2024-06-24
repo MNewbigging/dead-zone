@@ -15,7 +15,12 @@ export const AmmoDisplay: React.FC<AmmoDisplayProps> = observer(
     }
 
     const ammo = equippedGun.magAmmo;
+    const reserve = equippedGun.reserveAmmo;
 
-    return <div className="ammo-display">{ammo} | 100</div>;
+    return (
+      <div className="ammo-display">
+        {ammo} | {reserve}
+      </div>
+    );
   }
 );

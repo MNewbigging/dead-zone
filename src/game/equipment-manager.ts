@@ -15,6 +15,8 @@ export class EquipmentManager {
   @observable equippedGun?: Gun;
   private equipping = false;
 
+  @observable pistolAmmo = 100;
+
   constructor(
     private gameLoader: GameLoader,
     private mouseListener: MouseListener,
@@ -46,6 +48,10 @@ export class EquipmentManager {
 
     // Equip straight away
     this.equipGun(this.pistol);
+  }
+
+  pickupPistolAmmo(ammoCount: number) {
+    this.pistol.addReserveAmmo(ammoCount);
   }
 
   update(dt: number) {

@@ -11,7 +11,7 @@ import {
   AutomaticFiringMode,
   SemiAutoFiringMode,
 } from "./firing-modes";
-import { makeAutoObservable, observable } from "mobx";
+import { action, makeAutoObservable, observable } from "mobx";
 
 export interface GunProps {
   object: THREE.Object3D;
@@ -44,6 +44,7 @@ export class Gun {
   private raycaster = new THREE.Raycaster();
 
   @observable magAmmo: number;
+  @observable reserveAmmo = 0;
 
   private firingMode: FiringMode;
 
@@ -131,6 +132,10 @@ export class Gun {
   setFiringMode(mode: FiringModeName) {
     this.firingMode.disable();
     this.firingMode = this.getFiringMode(mode);
+  }
+
+  @action addReserveAmmo(count: number) {
+    this.reserveAmmo += count;
   }
 
   update(dt: number) {
@@ -295,11 +300,23 @@ export class Gun {
   }
 
   private onPressR = () => {
-    this.reloadAction?.reset().play();
+    // Only reload if there is at least one bullet in reserve
+    if (this.reserveAmmo > 0) {
+      this.reloadAction?.reset().play();
+    }
   };
 
   private onReloadAnimationEnd = () => {
-    // Fill magazine!
-    this.magAmmo = this.magSize;
+    // Add bullets left in mag back into reserve
+    this.reserveAmmo += this.magAmmo;
+
+    // Fill magazine from reserve ammo
+    if (this.reserveAmmo >= this.magSize) {
+      this.magAmmo = this.magSize;
+      this.reserveAmmo -= this.magSize;
+    } else {
+      this.magAmmo = this.reserveAmmo;
+      this.reserveAmmo = 0;
+    }
   };
 }

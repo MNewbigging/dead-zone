@@ -46,6 +46,7 @@ export class GameState {
       this.scene,
       this.camera
     );
+    this.equipmentManager.pickupPistolAmmo(12);
     this.equipmentManager.equipPistol();
 
     this.setupLights();
