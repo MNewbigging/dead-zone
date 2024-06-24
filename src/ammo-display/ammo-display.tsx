@@ -19,7 +19,8 @@ export const AmmoDisplay: React.FC<AmmoDisplayProps> = observer(
 
     return (
       <div className="ammo-display">
-        {ammo} | {reserve}
+        <span className="ammo">{ammo} | </span>
+        <span className="reserve">{reserve}</span>
       </div>
     );
   }

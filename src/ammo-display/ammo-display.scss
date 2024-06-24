@@ -5,10 +5,19 @@
   padding: 8px 12px;
   border-radius: 2px;
   background-color: rgba(0, 0, 0, 0.5);
-  color: white;
   font-size: 26px;
 
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: end;
+  gap: 6px;
+
+  .ammo {
+    color: white;
+  }
+
+  .reserve {
+    color: rgb(156, 156, 156);
+    font-size: 22px;
+  }
 }
