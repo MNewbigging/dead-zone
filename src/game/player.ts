@@ -55,14 +55,4 @@ export class Player {
     this.controls.moveForward(velocity.z);
     this.controls.moveRight(velocity.x);
   }
-
-  private trackStamina(dt: number) {
-    if (this.keyboardListener.isKeyPressed("shift")) {
-      this.currentStamina -= dt * this.staminaDrainRate;
-      this.currentStamina = Math.max(0, this.currentStamina);
-    } else {
-      this.currentStamina += dt * this.staminaRechargeRate;
-      this.currentStamina = Math.min(this.staminaTotal, this.currentStamina);
-    }
-  }
 }

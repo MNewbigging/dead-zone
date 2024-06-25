@@ -55,9 +55,11 @@ export class GameState {
     this.setupLights();
     this.setupHdri();
 
+    // Level
+    this.scene.add(this.gameLoader.modelLoader.level);
+
     // Game setup
     this.camera.position.set(0, 1.5, 2);
-    this.setupObjects();
     this.equipmentManager.pickupPistolAmmo(12);
     this.equipmentManager.equipPistol();
 

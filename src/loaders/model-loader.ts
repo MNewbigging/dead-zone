@@ -1,11 +1,13 @@
 import * as THREE from "three";
 import * as SkeletonUtils from "three/examples/jsm/utils/SkeletonUtils";
 import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
 export class ModelLoader {
   doneLoading = false;
   readonly models = new Map<string, THREE.Object3D>();
 
+  level = this.createDebugObject();
   pistol = this.createDebugObject();
   rifle = this.createDebugObject();
 
@@ -41,6 +43,12 @@ export class ModelLoader {
   }
 
   private loadModels = () => {
+    const gltfLoader = new GLTFLoader(this.loadingManager);
+    const levelUrl = new URL("/models/level.glb", import.meta.url).href;
+    gltfLoader.load(levelUrl, (gltf) => {
+      this.level = gltf.scene;
+    });
+
     const fbxLoader = new FBXLoader(this.loadingManager);
     this.loadPistol(fbxLoader);
     this.loadRifle(fbxLoader);
