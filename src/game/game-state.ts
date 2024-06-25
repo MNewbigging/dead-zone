@@ -10,6 +10,7 @@ import { MouseListener } from "../listeners/mouse-listener";
 import { KeyboardListener } from "../listeners/keyboard-listener";
 import { EquipmentManager } from "./equipment-manager";
 import { Player } from "./player";
+import { createConvexRegionHelper } from "../utils/navmesh-helper";
 
 export class GameState {
   private renderPipeline: RenderPipeline;
@@ -56,7 +57,14 @@ export class GameState {
     this.setupHdri();
 
     // Level
-    this.scene.add(this.gameLoader.modelLoader.level);
+    //this.scene.add(this.gameLoader.modelLoader.level);
+
+    if (this.gameLoader.modelLoader.navmesh) {
+      const navmeshHelper = createConvexRegionHelper(
+        this.gameLoader.modelLoader.navmesh
+      );
+      this.scene.add(navmeshHelper);
+    }
 
     // Game setup
     this.camera.position.set(0, 1.5, 2);

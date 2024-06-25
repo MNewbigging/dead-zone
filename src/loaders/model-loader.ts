@@ -1,3 +1,4 @@
+import * as YUKA from "yuka";
 import * as THREE from "three";
 import * as SkeletonUtils from "three/examples/jsm/utils/SkeletonUtils";
 import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader";
@@ -8,6 +9,7 @@ export class ModelLoader {
   readonly models = new Map<string, THREE.Object3D>();
 
   level = this.createDebugObject();
+  navmesh?: YUKA.NavMesh;
   pistol = this.createDebugObject();
   rifle = this.createDebugObject();
 
@@ -42,12 +44,9 @@ export class ModelLoader {
     this.loadModels();
   }
 
-  private loadModels = () => {
-    const gltfLoader = new GLTFLoader(this.loadingManager);
-    const levelUrl = new URL("/models/level.glb", import.meta.url).href;
-    gltfLoader.load(levelUrl, (gltf) => {
-      this.level = gltf.scene;
-    });
+  private loadModels = async () => {
+    this.loadLevel();
+    await this.loadNavMesh();
 
     const fbxLoader = new FBXLoader(this.loadingManager);
     this.loadPistol(fbxLoader);
@@ -61,6 +60,20 @@ export class ModelLoader {
       });
     });
   };
+
+  private async loadNavMesh() {
+    const loader = new YUKA.NavMeshLoader();
+    const navmesh = await loader.load("/models/navmesh.glb");
+    this.navmesh = navmesh;
+  }
+
+  private loadLevel() {
+    const gltfLoader = new GLTFLoader(this.loadingManager);
+    const levelUrl = new URL("/models/level.glb", import.meta.url).href;
+    gltfLoader.load(levelUrl, (gltf) => {
+      this.level = gltf.scene;
+    });
+  }
 
   private loadPistol(loader: FBXLoader) {
     const pistolUrl = new URL("/models/pistol.fbx", import.meta.url).href;
