@@ -1,27 +1,40 @@
+import * as YUKA from "yuka";
 import * as THREE from "three";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
 
 import { KeyboardListener } from "../listeners/keyboard-listener";
-import { makeAutoObservable, observable } from "mobx";
+import { StaminaManager } from "./stamina-manager";
+import { InputManager } from "./input-manager";
 
-export class Player {
-  @observable staminaTotal = 100;
-  @observable currentStamina = 100;
-  private staminaDrainRate = 100;
-  private staminaRechargeRate = 50;
-
+export class Player extends YUKA.MovingEntity {
   private moveSpeed = 5;
   private sprintMultiplier = 2;
 
+  private currentRegion: YUKA.Polygon;
+  private currentPosition = new YUKA.Vector3();
+  private previousPosition = new YUKA.Vector3();
+  private clampedPosition = new YUKA.Vector3();
+
   constructor(
+    private inputManager: InputManager,
+    private staminaManager: StaminaManager,
     private keyboardListener: KeyboardListener,
-    private controls: PointerLockControls
+    private controls: PointerLockControls, // should player create this?
+    private navmesh: YUKA.NavMesh
   ) {
-    makeAutoObservable(this);
+    super();
+
+    // Get closest region to player
+    this.currentRegion = navmesh.getClosestRegion(new YUKA.Vector3()); // put starting position in here
   }
 
   update(dt: number) {
+    super.update(dt);
+
     this.move(dt);
+    this.stayWithinLevel();
+
+    return this;
   }
 
   private move(dt: number) {
@@ -37,15 +50,8 @@ export class Player {
 
     let speedActual = this.moveSpeed;
 
-    if (this.keyboardListener.isKeyPressed("shift")) {
-      this.currentStamina -= dt * this.staminaDrainRate;
-      this.currentStamina = Math.max(0, this.currentStamina);
-      if (this.currentStamina > 0) {
-        speedActual *= this.sprintMultiplier;
-      }
-    } else {
-      this.currentStamina += dt * this.staminaRechargeRate;
-      this.currentStamina = Math.min(this.staminaTotal, this.currentStamina);
+    if (this.inputManager.sprinting && this.staminaManager.currentStamina > 0) {
+      speedActual *= this.sprintMultiplier;
     }
 
     const velocity = new THREE.Vector3();
@@ -54,5 +60,29 @@ export class Player {
 
     this.controls.moveForward(velocity.z);
     this.controls.moveRight(velocity.x);
+  }
+
+  private stayWithinLevel() {
+    const playerObject = this.controls.getObject();
+    this.currentPosition.set(
+      playerObject.position.x,
+      playerObject.position.y,
+      playerObject.position.z
+    );
+
+    this.currentRegion = this.navmesh.clampMovement(
+      this.currentRegion,
+      this.previousPosition,
+      this.currentPosition,
+      this.clampedPosition
+    );
+
+    this.previousPosition.copy(this.position);
+
+    const distance = this.currentRegion.plane.distanceToPoint(this.position);
+
+    this.position.y -= distance * 0.2;
+
+    return this;
   }
 }

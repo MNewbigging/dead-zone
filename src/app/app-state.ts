@@ -10,7 +10,7 @@ export class AppState {
   @observable paused = false;
 
   readonly gameLoader = new GameLoader();
-  gameState?: GameState;
+  @observable gameState?: GameState;
 
   private events = new EventListener();
 

@@ -1,4 +1,5 @@
 import * as TWEEN from "@tweenjs/tween.js";
+import * as YUKA from "yuka";
 import * as THREE from "three";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
 
@@ -11,8 +12,13 @@ import { KeyboardListener } from "../listeners/keyboard-listener";
 import { EquipmentManager } from "./equipment-manager";
 import { Player } from "./player";
 import { createConvexRegionHelper } from "../utils/navmesh-helper";
+import { InputManager } from "./input-manager";
+import { makeAutoObservable, observable } from "mobx";
+import { StaminaManager } from "./stamina-manager";
 
 export class GameState {
+  @observable staminaManager: StaminaManager;
+
   private renderPipeline: RenderPipeline;
   private clock = new THREE.Clock();
   private scene = new THREE.Scene();
@@ -22,15 +28,23 @@ export class GameState {
   private keyboardListener = new KeyboardListener();
   private paused = false;
 
+  private inputManager: InputManager;
+
+  entityManager = new YUKA.EntityManager();
+
   player: Player;
   equipmentManager: EquipmentManager;
-
   zombies: AnimatedCharacter[] = [];
 
   constructor(private gameLoader: GameLoader, private events: EventListener) {
+    makeAutoObservable(this);
+
     this.camera = this.setupCamera();
     this.scene.add(this.camera);
     this.renderPipeline = new RenderPipeline(this.scene, this.camera);
+
+    this.inputManager = new InputManager(this.keyboardListener);
+    this.staminaManager = new StaminaManager(this.inputManager);
 
     // Handle pointer lock events
     document.addEventListener("pointerlockchange", this.onPointerLockChange);
@@ -42,7 +56,13 @@ export class GameState {
     );
     this.renderPipeline.canvas.requestPointerLock();
 
-    this.player = new Player(this.keyboardListener, this.controls);
+    this.player = new Player(
+      this.inputManager,
+      this.staminaManager,
+      this.keyboardListener,
+      this.controls,
+      this.gameLoader.modelLoader.navmesh
+    );
 
     this.equipmentManager = new EquipmentManager(
       gameLoader,

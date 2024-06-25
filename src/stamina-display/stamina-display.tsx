@@ -9,7 +9,8 @@ interface StaminaDisplayProps {
 
 export const StaminaDisplay: React.FC<StaminaDisplayProps> = observer(
   ({ gameState }) => {
-    const staminaRemaining = gameState.player.currentStamina;
+    const staminaRemaining = gameState.staminaManager.currentStamina;
+    console.log("stamina", staminaRemaining);
 
     return (
       <div className="stamina-display">

@@ -9,7 +9,7 @@ export class ModelLoader {
   readonly models = new Map<string, THREE.Object3D>();
 
   level = this.createDebugObject();
-  navmesh?: YUKA.NavMesh;
+  navmesh = new YUKA.NavMesh();
   pistol = this.createDebugObject();
   rifle = this.createDebugObject();
 
